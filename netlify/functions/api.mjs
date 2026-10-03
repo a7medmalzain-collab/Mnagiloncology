@@ -82,6 +82,7 @@ export default async (req) => {
     if (p[0] === "login" && m === "POST") {
       const pw = String(body.password || "");
       const ap = process.env.ADMIN_PASSWORD;
+      if (!ap || !process.env.JWT_SECRET) return J({ error: "لم يتم ضبط ADMIN_PASSWORD و JWT_SECRET في إعدادات Netlify" }, 503);
       const ok = ap && process.env.JWT_SECRET && pw.length === ap.length && crypto.timingSafeEqual(Buffer.from(pw), Buffer.from(ap));
       if (!ok) { await new Promise((r) => setTimeout(r, 800)); return J({ error: "كلمة المرور غير صحيحة" }, 401); }
       return J({ token: sign({ exp: Date.now() + 12 * 3600e3 }) });
