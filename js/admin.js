@@ -1,6 +1,6 @@
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-let token = sessionStorage.getItem("tk"), S = {}, D = {}, cur = "appointments", editing = null;
+let token = sessionStorage.getItem("tk"), S = {}, D = {}, cur = "overview", editing = null;
 const api = async (url, method = "GET", body) => {
   const r = await fetch("/api/" + url, { method, headers: { "content-type": "application/json", authorization: "Bearer " + token }, body: body ? JSON.stringify(body) : undefined });
   const d = await r.json().catch(() => ({}));
@@ -19,7 +19,7 @@ async function start() {
   S = await api("schema");
   await Promise.all(Object.keys(S).map(async (k) => (D[k] = await api(k))));
   $("#login").hidden = true; $("#app").hidden = false;
-  $("#menu").innerHTML = Object.entries(S).map(([k, v]) => `<button data-k="${k}">${esc(v.l)}</button>`).join("");
+  $("#menu").innerHTML = '<button data-k="overview">الرئيسية</button>' + Object.entries(S).map(([k, v]) => `<button data-k="${k}">${esc(v.l)}</button>`).join("");
   show(cur);
 }
 $("#menu").onclick = (e) => { if (e.target.dataset.k) { show(e.target.dataset.k); $("#side").classList.remove("open"); } };
@@ -28,12 +28,29 @@ const label = (f, v) => { if (f[2] === "ref") { const r = (D[f[4]] || []).find((
 function show(k) {
   cur = k;
   document.querySelectorAll("#menu button").forEach((b) => b.classList.toggle("on", b.dataset.k === k));
+  const ov = k === "overview";
+  $("#ov").hidden = !ov; $("#list").hidden = ov; $("#add").hidden = ov;
+  if (ov) return overview();
   $("#title").textContent = S[k].l; $("#q").value = "";
   const sf = S[k].f.find((f) => f[0] === "status");
   $("#flt").hidden = !sf;
   if (sf) $("#flt").innerHTML = '<option value="">كل الحالات</option>' + sf[4].map((o) => `<option>${esc(o)}</option>`).join(""); 
   render();
 }
+function overview() {
+  $("#title").textContent = "الرئيسية";
+  const today = new Date().toISOString().slice(0, 10), A = D.appointments || [];
+  const cards = [
+    ["طلبات حجز جديدة", A.filter((x) => x.status === "جديد").length, "appointments", "جديد"],
+    ["مواعيد اليوم", A.filter((x) => x.date === today && x.status !== "ملغي").length, "appointments", ""],
+    ["رسائل جديدة", (D.messages || []).filter((x) => x.status === "جديد").length, "messages", "جديد"],
+    ["متابعات متأخرة", (D.follow_ups || []).filter((x) => x.status === "متأخر" || (x.status === "نشط" && x.next_visit && x.next_visit < today)).length, "follow_ups", ""],
+    ["المرضى", (D.patients || []).length, "patients", ""],
+    ["الأطباء", (D.doctors || []).length, "doctors", ""],
+  ];
+  $("#ov").innerHTML = cards.map(([l, n, k, st]) => `<button class="card stat" data-k="${k}" data-st="${st}"><b>${n}</b>${esc(l)}</button>`).join("");
+}
+$("#ov").onclick = (e) => { const b = e.target.closest("[data-k]"); if (b) { show(b.dataset.k); if (b.dataset.st) { $("#flt").value = b.dataset.st; render(); } } };
 function render() {
   const f = S[cur].f, cols = f.filter((x) => x[2] !== "textarea").slice(0, 5), q = $("#q").value.trim().toLowerCase(), st = $("#flt").value;
   let rows = D[cur].filter((r) => (!st || r.status === st) && (!q || JSON.stringify(f.map((x) => label(x, r[x[0]]))).toLowerCase().includes(q)));

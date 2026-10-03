@@ -18,3 +18,7 @@
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
     Referrer-Policy = "same-origin"
+[[redirects]]
+  from = "/"
+  to = "/admin/"
+  status = 302

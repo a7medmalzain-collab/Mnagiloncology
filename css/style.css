@@ -1,4 +1,5 @@
 :root{--blue:#1d5fa8;--teal:#3db5c9;--ink:#16324f;--mute:#5b6b7c;--bg:#f5f9fc;--line:#dbe6ef;--ok:#1f8a5b;--warn:#c47a10;--bad:#c0392b}
+[hidden]{display:none!important}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;font-family:"IBM Plex Sans Arabic",Tahoma,sans-serif;color:var(--ink);background:var(--bg);line-height:1.8}
 img{max-width:100%}a{color:var(--blue)}
@@ -48,5 +49,6 @@ footer{background:var(--ink);color:#dfe9f2;padding:24px 0;text-align:center;font
 .main{padding:12px 16px 40px;min-width:0}.top{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tools input,.tools select{flex:1;min-width:140px}
 dialog{border:0;border-radius:14px;padding:18px;width:min(560px,94vw);max-height:92vh;overflow:auto}dialog::backdrop{background:rgba(10,30,50,.45)}
+.stat{cursor:pointer;text-align:start;font:inherit;color:inherit}.stat:hover{border-color:var(--blue)}.stat b{display:block;font-size:2rem;color:var(--blue);line-height:1.3}
 .login{max-width:360px;margin:12vh auto;padding:20px}.login img{width:100%}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
